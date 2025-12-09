@@ -6,6 +6,7 @@ export const osArch: string = os.arch();
 
 export interface Inputs {
   distribution: string;
+  githubReleaseMirror: string;
   version: string;
   args: string;
   workdir: string;
@@ -15,6 +16,7 @@ export interface Inputs {
 export async function getInputs(): Promise<Inputs> {
   return {
     distribution: core.getInput('distribution') || 'goreleaser',
+    githubReleaseMirror: core.getInput('github-release-mirror'),
     version: core.getInput('version') || '~> v2',
     args: core.getInput('args'),
     workdir: core.getInput('workdir') || '.',
