@@ -1,0 +1,62 @@
+name: Sync upstream and build
+
+on:
+  workflow_dispatch: # Allow manual trigger
+  schedule:
+    - cron: '0 0 * * 2' # Run weekly on Tuesday at midnight (UTC)
+
+env:
+  UPSTREAM_REPO: "https://github.com/goreleaser/goreleaser-action.git"
+  MAIN_BRANCH: "master"
+
+jobs:
+  sync-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout current repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0 # Fetch full history
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24.x'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm i -g @vercel/ncc
+          npm i -g typescript
+
+      - name: Merge upstream changes and rebuild
+        run: |
+          # Configure Git user
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          
+          # Add upstream repository and fetch updates
+          git checkout $MAIN_BRANCH
+          git remote add upstream $UPSTREAM_REPO || echo "Upstream remote already exists"
+          git pull upstream $MAIN_BRANCH
+          git push origin $MAIN_BRANCH
+          
+          # Merge upstream changes, ignoring the dist folder
+          git checkout gitea
+          git merge --no-commit --no-ff main
+          # Reset any changes to the dist folder
+          git reset -- dist/ || true
+          git checkout -- dist/ || true
+
+          # Build the project
+          npm run build
+
+          # Commit the build output
+          git add .
+          if git diff-index --quiet HEAD --; then
+            echo "No build changes to commit"
+          else
+            git commit -m "auto: merge upstream changes and build"
+            git push
+            echo "Build changes committed and pushed"
+          fi

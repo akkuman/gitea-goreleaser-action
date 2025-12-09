@@ -11,6 +11,10 @@ inputs:
     description: 'GoReleaser Distribution (goreleaser or goreleaser-pro)'
     default: 'goreleaser'
     required: false
+  github-release-mirror:
+    description: 'GitHub release mirror repository, default is https://github.com'
+    default: 'https://github.com'
+    required: false
   version:
     description: 'GoReleaser version'
     default: '~> v2'

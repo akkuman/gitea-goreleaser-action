@@ -7,11 +7,12 @@ import * as github from './github';
 import * as core from '@actions/core';
 import * as tc from '@actions/tool-cache';
 
-export async function install(distribution: string, version: string): Promise<string> {
+export async function install(distribution: string, version: string, githubReleaseMirror: string): Promise<string> {
   const release: github.GitHubRelease = await github.getRelease(distribution, version);
   const filename = getFilename(distribution);
   const downloadUrl = util.format(
-    'https://github.com/goreleaser/%s/releases/download/%s/%s',
+    '%s/goreleaser/%s/releases/download/%s/%s',
+    githubReleaseMirror,
     distribution,
     release.tag_name,
     filename
