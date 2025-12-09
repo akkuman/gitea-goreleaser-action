@@ -1,4 +1,4 @@
-name: Sync upstream and build
+name: sync upstream and build
 
 on:
   workflow_dispatch: # Allow manual trigger
@@ -25,9 +25,18 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm ci
-          npm i -g @vercel/ncc
-          npm i -g typescript
+          corepack enable
+          if [ -f "yarn.lock" ]; then
+            echo "Using yarn as package manager"
+            yarn install --immutable
+          elif [ -f "pnpm-lock.yaml" ]; then
+            echo "Using pnpm as package manager"
+            pnpm install --frozen-lockfile
+          else
+            echo "Using npm as package manager"
+            npm ci
+          fi
+          npm i -g @vercel/ncc typescript
 
       - name: Merge upstream changes and rebuild
         run: |
