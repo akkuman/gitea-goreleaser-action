@@ -52,7 +52,7 @@ jobs:
           
           # Merge upstream changes, ignoring the dist folder
           git checkout gitea
-          git merge --no-commit --no-ff main
+          git merge --no-commit --no-ff $MAIN_BRANCH
           # Reset any changes to the dist folder
           git reset -- dist/ || true
           git checkout -- dist/ || true
